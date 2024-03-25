@@ -1,7 +1,6 @@
 qiskit==0.42.1
 qiskit-aer==0.12.0
 qiskit-aqua==0.8.2
-qiskit-braket-provider @ file:///Users/bapt/Desktop/qiskit-braket-provider
 qiskit-ibmq-provider==0.20.2
 qiskit-ignis==0.5.2
 qiskit-nature==0.2.2
