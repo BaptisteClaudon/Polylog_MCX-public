@@ -1,6 +1,6 @@
 from qiskit import QuantumCircuit
 from qiskit.compiler import transpile
-from polylog_mcx import one_ancilla_mcx
+from log_3_mcx import one_ancilla_mcx
 
 for nc in range(2, 31): #for testing, take n=5. Otherwise, as high as you want
     print('Optimizing', nc)

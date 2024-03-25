@@ -2,20 +2,43 @@ from qiskit import QuantumCircuit
 from qiskit.compiler import transpile
 import numpy as np
 
-print('The circuits are compiled in the [u, cx] basis.')
 log_3_memory = {}
 log_3_size = {}
 log_3_depth = {}
-log_3_depth[1] = 1
-log_3_size[1] = 1
-qc = QuantumCircuit(3)
-qc.cx(0, 2)
-log_3_memory[1] = qc.to_gate()
-for nc in range(2, 31): #for testing, take n=5. Otherwise, as high as you want
-    qc = QuantumCircuit.from_qasm_file('initialise_log3/log3_'+str(nc)+'.qasm')
-    log_3_memory[nc] = qc.to_gate()
-    log_3_depth[nc] = qc.depth()
-    log_3_size[nc] = qc.size()
+
+print('The circuits are compiled in the [x, cx, ccx] basis.')
+nc = 1
+qc = QuantumCircuit(nc+2)
+qc.cx(control_qubit=0, target_qubit=nc+1)
+qc = transpile(qc, basis_gates=['x', 'cx', 'ccx'])
+log_3_memory[nc] = qc.to_gate()
+log_3_depth[nc] = qc.depth()
+log_3_size[nc] = qc.size()
+nc = 2
+qc = QuantumCircuit(nc+2)
+qc.ccx(control_qubit1=0, control_qubit2=1, target_qubit=nc+1)
+qc = transpile(qc, basis_gates=['x', 'cx', 'ccx'])
+log_3_memory[nc] = qc.to_gate()
+log_3_depth[nc] = qc.depth()
+log_3_size[nc] = qc.size()
+nc = 4
+qc = QuantumCircuit(nc+2)
+qc.ccx(control_qubit1=0, control_qubit2=1, target_qubit=nc)
+qc.ccx(control_qubit1=2, control_qubit2=3, target_qubit=0)
+qc.x(0)
+qc.ccx(control_qubit1=0, control_qubit2=nc, target_qubit=nc+1)
+qc.x(0)
+qc.ccx(control_qubit1=2, control_qubit2=3, target_qubit=0)
+qc.ccx(control_qubit1=0, control_qubit2=1, target_qubit=nc)
+qc.ccx(control_qubit1=2, control_qubit2=3, target_qubit=0)
+qc.x(0)
+qc.ccx(control_qubit1=0, control_qubit2=nc, target_qubit=nc+1)
+qc.x(0)
+qc.ccx(control_qubit1=2, control_qubit2=3, target_qubit=0)
+qc = transpile(qc, basis_gates=['x', 'cx', 'ccx'])
+log_3_memory[nc] = qc.to_gate()
+log_3_depth[nc] = qc.depth()
+log_3_size[nc] = qc.size()
 
 def one_ancilla_mcx(ncontrol):
     even = [k for k in range(ncontrol) if k % 2 == 0]
@@ -108,3 +131,11 @@ def access_polylog_size(nc):
         return log_3_size[nc]
     else:
         print('Such gate has not been compiled yet.')
+
+def classical_gates_circuit(ncontrol):
+    nqubits = ncontrol+2
+    log3_gate = log3_cnx(ncontrol=ncontrol, trace_depth_and_size=True)
+    log3_qc = QuantumCircuit(nqubits)
+    log3_qc.append(log3_gate, list(range(nqubits)))
+    log3_qc = transpile(log3_qc, basis_gates=['x', 'cx', 'ccx'])
+    return log3_qc
